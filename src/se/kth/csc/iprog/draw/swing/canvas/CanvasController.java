@@ -1,0 +1,78 @@
+package se.kth.csc.iprog.draw.swing.canvas;
+
+import java.awt.Point;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.JFrame;
+
+import se.kth.csc.iprog.draw.model.ShapeContainer;
+
+public class CanvasController {
+    ShapeContainer model;
+
+    CanvasView view;
+
+    Point dragStart;
+
+    Point dragStop;
+
+    abstract static class InteractionStrategy implements MouseListener, MouseMotionListener, KeyListener {
+
+        ShapeContainer model;
+
+        CanvasView view;
+
+        InteractionStrategy(ShapeContainer model, CanvasView view) {
+            this.model = model;
+            this.view = view;
+        }
+
+        void activate() {
+            view.setFocusable(true);
+            view.requestFocusInWindow();
+            view.addMouseListener(this);
+            view.addMouseMotionListener(this);
+            view.addKeyListener(this);
+        }
+
+        void deactivate() {
+            view.removeMouseListener(this);
+            view.removeMouseMotionListener(this);
+            view.removeKeyListener(this);
+        }
+    }
+
+    Map<String, InteractionStrategy> modes = new HashMap<String, InteractionStrategy>();
+
+    String mode = "segment";
+
+    public CanvasController(final ShapeContainer model) {
+        this.model = model;
+        this.view = new CanvasView(model);
+        modes.put("segment", new ShapeController(ShapeContainer.SEGMENT, model, view));
+        modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view));
+        modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view));
+        modes.put("select", new SelectionController(model, view));
+
+        modes.get("select").activate();
+
+        JFrame f = new JFrame("canvas");
+        f.add(view);
+
+        f.pack();
+        f.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                view.close();
+            }
+        });
+        f.setLocation((int) (300 * Math.random()), (int) (500 * Math.random()));
+        f.setVisible(true);
+    }
+}
