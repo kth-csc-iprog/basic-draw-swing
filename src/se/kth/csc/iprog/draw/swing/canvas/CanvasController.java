@@ -82,6 +82,8 @@ public class CanvasController {
         f.add(view);
 
         f.pack();
+
+        // close the view (so it will unregister from the model) when the window closes
         f.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
