@@ -13,6 +13,12 @@ import javax.swing.JFrame;
 
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
+/**
+ * The canvas controller. Delegates to one sub-controller for each interaction mode (segment drawing, rectangle drawing,
+ * ellipse drawing, selection). Displays its canvas.
+ * 
+ * @author cristi
+ */
 public class CanvasController {
     ShapeContainer model;
 
@@ -22,6 +28,10 @@ public class CanvasController {
 
     Point dragStop;
 
+    /** keep track of all interaction controllers in a mapping */
+    Map<String, InteractionStrategy> modes;
+
+    /** the actual interaction controllers are coordinated by this one */
     abstract static class InteractionStrategy implements MouseListener, MouseMotionListener, KeyListener {
 
         ShapeContainer model;
@@ -33,6 +43,7 @@ public class CanvasController {
             this.view = view;
         }
 
+        /** Activate this controller, register listeners */
         void activate() {
             view.setFocusable(true);
             view.requestFocusInWindow();
@@ -41,6 +52,7 @@ public class CanvasController {
             view.addKeyListener(this);
         }
 
+        /** Another controller is being activated so we unregister listeners */
         void deactivate() {
             view.removeMouseListener(this);
             view.removeMouseMotionListener(this);
@@ -48,13 +60,16 @@ public class CanvasController {
         }
     }
 
-    Map<String, InteractionStrategy> modes = new HashMap<String, InteractionStrategy>();
-
     String mode = "segment";
 
     public CanvasController(final ShapeContainer model) {
         this.model = model;
+
+        // controller creates the view
         this.view = new CanvasView(model);
+
+        // prepare interaction controllers
+        modes = new HashMap<String, InteractionStrategy>();
         modes.put("segment", new ShapeController(ShapeContainer.SEGMENT, model, view));
         modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view));
         modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view));
@@ -62,6 +77,7 @@ public class CanvasController {
 
         modes.get("select").activate();
 
+        // controller displays the view
         JFrame f = new JFrame("canvas");
         f.add(view);
 

@@ -14,6 +14,12 @@ import se.kth.csc.iprog.draw.model.Segment;
 import se.kth.csc.iprog.draw.model.Shape;
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
+/**
+ * Canvas view, draws all the shapes in a ShapeContainer model. It is a JPanel that overrides paintComponent to draw the
+ * shapes. Simply repaints everyting on notification from the model.
+ * 
+ * @author cristi
+ */
 public class CanvasView extends JPanel implements Observer {
     private static final long serialVersionUID = 1L;
 
@@ -24,6 +30,9 @@ public class CanvasView extends JPanel implements Observer {
         model.addObserver(this);
     }
 
+    /**
+     * This method is needed so the observer doesn't remain hanged when e.g. the canvas is not visible any longer.
+     */
     public void close() {
         model.deleteObserver(this);
     }
