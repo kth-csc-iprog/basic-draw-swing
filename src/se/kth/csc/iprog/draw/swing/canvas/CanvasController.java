@@ -50,7 +50,7 @@ public class CanvasController implements ActionListener {
 
         // controller displays the view
         JFrame f = new JFrame("canvas");
-        f.add(new DrawingPanel(view, status, this, Arrays.asList("segment", "rectangle", "ellipse", "select")));
+        f.add(new DrawingView(view, status, this, Arrays.asList("segment", "rectangle", "ellipse", "select")));
 
         f.pack();
 

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -19,140 +20,180 @@ import javax.swing.ListSelectionModel;
 import se.kth.csc.iprog.draw.model.Shape;
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
+/**
+ * The form view. Builds the whole view. Reads the shapes from the model, fills
+ * them in a list and show the properties of the selected one.
+ * 
+ */
 public class FormView extends JPanel implements Observer {
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    ShapeContainer model;
+	// The model reference
+	ShapeContainer model;
 
-    DefaultListModel<Shape> listModel;
+	// The model representation for the JList
+	DefaultListModel<Shape> listModel;
 
-    JList<Shape> list;
+	// View components
+	JList<Shape> list;
+	JTextField xTextField;
+	JTextField yTextField;
+	JTextField heightTextField;
+	JTextField widthTextField;
+	JLabel surfaceValueLabel;
+	JLabel errorLabel;
 
-    JTextField xTextField;
+	/**
+	 * The constructor that adds the view to the model list of observers and
+	 * layouts the view components (list and text fields).
+	 */
+	public FormView(ShapeContainer m) {
+		super(new BorderLayout());
+		model = m;
+		model.addObserver(this);
 
-    JTextField yTextField;
+		listModel = new DefaultListModel<Shape>();
 
-    JTextField heightTextField;
+		list = new JList<Shape>(listModel);
+		list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		list.setLayoutOrientation(JList.VERTICAL);
+		list.setVisibleRowCount(-1);
 
-    JTextField widthTextField;
+		JScrollPane listScroller = new JScrollPane(list);
+		listScroller.setPreferredSize(new Dimension(230, 200));
+		add(listScroller, "Center");
 
-    JLabel errorLabel;
+		JPanel formPanel = new JPanel();
+		formPanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
 
-    public FormView(ShapeContainer m) {
-        super(new BorderLayout());
-        model = m;
-        model.addObserver(this);
+		JLabel xLabel = new JLabel("X:");
+		c.gridx = 0;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.EAST;
+		formPanel.add(xLabel, c);
+		xTextField = new JTextField();
+		c.gridx = 1;
+		c.insets = new Insets(1, 0, 1, 5);
+		xTextField.setColumns(10);
+		formPanel.add(xTextField, c);
 
-        listModel = new DefaultListModel<Shape>();
+		JLabel yLabel = new JLabel("Y:");
+		c.gridx = 0;
+		c.gridy = 1;
+		formPanel.add(yLabel, c);
+		yTextField = new JTextField();
+		c.gridx = 1;
+		yTextField.setColumns(10);
+		formPanel.add(yTextField, c);
 
-        list = new JList<Shape>(listModel);
-        list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        list.setLayoutOrientation(JList.VERTICAL);
-        list.setVisibleRowCount(-1);
+		JLabel heightLabel = new JLabel("Height:");
+		c.gridx = 0;
+		c.gridy = 2;
+		formPanel.add(heightLabel, c);
+		heightTextField = new JTextField();
+		c.gridx = 1;
+		heightTextField.setColumns(10);
+		formPanel.add(heightTextField, c);
 
-        JScrollPane listScroller = new JScrollPane(list);
-        listScroller.setPreferredSize(new Dimension(200, 200));
-        add(listScroller, "Center");
+		JLabel widthLabel = new JLabel("Width:");
+		c.gridx = 0;
+		c.gridy = 3;
+		formPanel.add(widthLabel, c);
+		widthTextField = new JTextField();
+		c.gridx = 1;
+		widthTextField.setColumns(10);
+		formPanel.add(widthTextField, c);
 
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
+		JLabel surfaceLabel = new JLabel("Surface:");
+		c.gridx = 0;
+		c.gridy = 4;
+		c.insets = new Insets(1, 10, 1, 2);
+		formPanel.add(surfaceLabel, c);
+		surfaceValueLabel = new JLabel();
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.WEST;
+		formPanel.add(surfaceValueLabel, c);
 
-        JLabel xLabel = new JLabel("X:");
-        c.gridx = 0;
-        c.gridy = 0;
-        formPanel.add(xLabel, c);
-        xTextField = new JTextField();
-        c.gridx = 1;
-        xTextField.setColumns(10);
-        formPanel.add(xTextField, c);
+		errorLabel = new JLabel("abc");
+		errorLabel.setForeground(Color.red);
+		add(errorLabel, "South");
 
-        JLabel yLabel = new JLabel("Y:");
-        c.gridx = 0;
-        c.gridy = 1;
-        formPanel.add(yLabel, c);
-        yTextField = new JTextField();
-        c.gridx = 1;
-        yTextField.setColumns(10);
-        formPanel.add(yTextField, c);
+		add(formPanel, "East");
 
-        JLabel heightLabel = new JLabel("Height:");
-        c.gridx = 0;
-        c.gridy = 2;
-        formPanel.add(heightLabel, c);
-        heightTextField = new JTextField();
-        c.gridx = 1;
-        heightTextField.setColumns(10);
-        formPanel.add(heightTextField, c);
+		// After the view is built, load the current shapes from the model
+		loadShapes();
 
-        JLabel widthLabel = new JLabel("Width:");
-        c.gridx = 0;
-        c.gridy = 3;
-        formPanel.add(widthLabel, c);
-        widthTextField = new JTextField();
-        c.gridx = 1;
-        widthTextField.setColumns(10);
-        formPanel.add(widthTextField, c);
+	}
 
-        errorLabel = new JLabel("abc");
-        c.gridx = 0;
-        c.gridy = 4;
-        errorLabel.setForeground(Color.red);
-        add(errorLabel, "South");
+	/**
+	 * This method is needed so the observer doesn't remain hanged when e.g. the
+	 * canvas is not visible any longer.
+	 */
+	public void close() {
+		model.deleteObserver(this);
+	}
 
-        add(formPanel, "East");
+	@Override
+	public void update(Observable o, Object arg) {
+		loadShapes();
+	}
 
-        // updateSelected(null);
+	/**
+	 * Loads the shapes from the model.
+	 */
+	private void loadShapes() {
+		// We store the currently selected shape, so we can reselect it after
+		// the shapes have been reloaded
+		Shape current = list.getSelectedValue();
 
-    }
+		// We remove all elements in the list and the error message
+		listModel.removeAllElements();
+		errorLabel.setText(" ");
 
-    /**
-     * This method is needed so the observer doesn't remain hanged when e.g. the canvas is not visible any longer.
-     */
-    public void close() {
-        model.deleteObserver(this);
-    }
+		// Read the shapes from the model and add them to the list
+		for (Shape shape : model.getAllShapes()) {
+			listModel.addElement(shape);
+		}
 
-    @Override
-    public void update(Observable o, Object arg) {
+		// Reselect the previously selected shape
+		list.setSelectedValue(current, true);
+	}
 
-        Shape current = list.getSelectedValue();
-        listModel.removeAllElements();
-        errorLabel.setText(" ");
+	/**
+	 * Updates the form input controls to represent the values of currently
+	 * selected shape. If no shape is selected, the form is disabled.
+	 */
+	public void updateSelected(Shape shape) {
+		if (shape != null) {
+			xTextField.setEnabled(true);
+			yTextField.setEnabled(true);
+			heightTextField.setEnabled(true);
+			widthTextField.setEnabled(true);
+			xTextField.setText(shape.getX() + "");
+			yTextField.setText(shape.getY() + "");
+			heightTextField.setText(shape.getH() + "");
+			widthTextField.setText(shape.getW() + "");
+			surfaceValueLabel.setText(shape.getSurface() + "");
+		} else {
+			xTextField.setEnabled(false);
+			yTextField.setEnabled(false);
+			heightTextField.setEnabled(false);
+			widthTextField.setEnabled(false);
+			xTextField.setText("");
+			yTextField.setText("");
+			heightTextField.setText("");
+			widthTextField.setText("");
+			surfaceValueLabel.setText("");
+		}
 
-        for (Shape shape : model.getAllShapes()) {
-            listModel.addElement(shape);
-        }
+	}
 
-        list.setSelectedValue(current, true);
-
-    }
-
-    public void updateSelected(Shape shape) {
-        if (shape != null) {
-            xTextField.setEnabled(true);
-            yTextField.setEnabled(true);
-            heightTextField.setEnabled(true);
-            widthTextField.setEnabled(true);
-            xTextField.setText(shape.getX() + "");
-            yTextField.setText(shape.getY() + "");
-            heightTextField.setText(shape.getH() + "");
-            widthTextField.setText(shape.getW() + "");
-        } else {
-            xTextField.setEnabled(false);
-            yTextField.setEnabled(false);
-            heightTextField.setEnabled(false);
-            widthTextField.setEnabled(false);
-            xTextField.setText("");
-            yTextField.setText("");
-            heightTextField.setText("");
-            widthTextField.setText("");
-        }
-
-    }
-
-    public void showError(String text) {
-        errorLabel.setText(text);
-    }
+	/**
+	 * Show the error message.
+	 */
+	public void showError(String text) {
+		errorLabel.setText(text);
+	}
 
 }
