@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import javax.swing.JLabel;
+
 import se.kth.csc.iprog.draw.model.Shape;
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
@@ -28,8 +30,8 @@ public class ShapeController extends CanvasInteractionController {
      */
     Shape current;
 
-    public ShapeController(int type, ShapeContainer model, CanvasView view) {
-        super(model, view);
+    public ShapeController(int type, ShapeContainer model, CanvasView view, JLabel status) {
+        super(model, view, status);
         this.type = type;
     }
 
@@ -43,6 +45,7 @@ public class ShapeController extends CanvasInteractionController {
         // dragging ended
         current = null;
         dragStart = null;
+        status.setText(" ");
     }
 
     @Override
@@ -64,6 +67,8 @@ public class ShapeController extends CanvasInteractionController {
         else
             // if dragging has been going on for a while, modify current shape
             model.modifyShape(current, sc.x, sc.y, sc.w, sc.h);
+        if (current != null)
+            status.setText("drawing " + current);
     }
 
     @Override
@@ -78,6 +83,7 @@ public class ShapeController extends CanvasInteractionController {
             model.removeShape(current);
             current = null;
             dragStart = null;
+            status.setText("");
         }
 
     }

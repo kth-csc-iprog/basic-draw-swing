@@ -1,6 +1,5 @@
 package se.kth.csc.iprog.draw.swing.canvas;
 
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -11,6 +10,7 @@ import java.util.Map;
 
 import javax.swing.AbstractButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
@@ -25,14 +25,14 @@ public class CanvasController implements ActionListener {
 
     CanvasView view;
 
-    Point dragStart;
-
-    Point dragStop;
-
     /** keep track of all interaction controllers in a mapping */
     Map<String, CanvasInteractionController> modes;
 
     CanvasInteractionController currentMode;
+
+    // status bar, its text is not part of the basic model, but part of the interaction status, together with the
+    // current mode
+    JLabel status = new JLabel(" ");
 
     public CanvasController(final ShapeContainer model) {
         this.model = model;
@@ -42,15 +42,15 @@ public class CanvasController implements ActionListener {
 
         // prepare interaction controllers
         modes = new HashMap<String, CanvasInteractionController>();
-        modes.put("segment", new ShapeController(ShapeContainer.SEGMENT, model, view));
-        modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view));
-        modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view));
-        modes.put("select", new SelectionController(model, view));
+        modes.put("segment", new ShapeController(ShapeContainer.SEGMENT, model, view, status));
+        modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view, status));
+        modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view, status));
+        modes.put("select", new SelectionController(model, view, status));
         currentMode = modes.get("segment");
 
         // controller displays the view
         JFrame f = new JFrame("canvas");
-        f.add(new DrawingPanel(view, this, Arrays.asList("segment", "rectangle", "ellipse", "select")));
+        f.add(new DrawingPanel(view, status, this, Arrays.asList("segment", "rectangle", "ellipse", "select")));
 
         f.pack();
 

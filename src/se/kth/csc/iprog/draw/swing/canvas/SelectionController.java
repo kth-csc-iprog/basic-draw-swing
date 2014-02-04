@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import javax.swing.JLabel;
+
 import se.kth.csc.iprog.draw.model.Ellipse;
 import se.kth.csc.iprog.draw.model.Rectangle;
 import se.kth.csc.iprog.draw.model.Segment;
@@ -29,8 +31,8 @@ public class SelectionController extends CanvasInteractionController {
      */
     double originalX, originalY;
 
-    public SelectionController(ShapeContainer model, CanvasView view) {
-        super(model, view);
+    public SelectionController(ShapeContainer model, CanvasView view, JLabel status) {
+        super(model, view, status);
     }
 
     // it is hard to click precisely on a line so we allow a pixel deviation
@@ -89,6 +91,7 @@ public class SelectionController extends CanvasInteractionController {
         if (selected == null)
             dragStart = null;
         else {
+            status.setText("selected " + selected);
             // save the original position of the shape
             originalX = selected.getX();
             originalY = selected.getY();
@@ -109,6 +112,7 @@ public class SelectionController extends CanvasInteractionController {
         // end of dragging, shape was moved already by the mouseDragged event
         selected = null;
         dragStart = null;
+        status.setText(" ");
     }
 
     @Override
@@ -120,6 +124,7 @@ public class SelectionController extends CanvasInteractionController {
         // move the shape in relation to the original position
         model.modifyShape(selected, originalX + e.getPoint().x - dragStart.x, originalY + e.getPoint().y - dragStart.y,
             selected.getW(), selected.getH());
+        status.setText("moving " + selected);
     }
 
     @Override
@@ -133,6 +138,7 @@ public class SelectionController extends CanvasInteractionController {
             model.modifyShape(selected, originalX, originalY, selected.getW(), selected.getH());
             selected = null;
             dragStart = null;
+            status.setText(" ");
         }
 
     }

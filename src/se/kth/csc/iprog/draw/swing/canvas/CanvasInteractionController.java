@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.JLabel;
+
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
 /**
@@ -21,9 +23,12 @@ abstract class CanvasInteractionController implements MouseListener, MouseMotion
 
     CanvasView view;
 
-    CanvasInteractionController(ShapeContainer model, CanvasView view) {
+    JLabel status;
+
+    CanvasInteractionController(ShapeContainer model, CanvasView view, JLabel status) {
         this.model = model;
         this.view = view;
+        this.status = status;
     }
 
     /** Activate this controller, register listeners */
