@@ -14,7 +14,9 @@ import javax.swing.border.BevelBorder;
 
 /**
  * The layout of the drawing view. Makes the tool buttons and places them in relation to the drawing canvas and the
- * status bar
+ * status bar. This little class separates the concern of layout (which is not interested in the model at all) from the
+ * concern of viewing the model (which CanvasView has). It could be just a factory method that creates the layout rather
+ * than extending JPanel, see MainPanelCreator for that alternative.
  * 
  * @author cristi
  */
