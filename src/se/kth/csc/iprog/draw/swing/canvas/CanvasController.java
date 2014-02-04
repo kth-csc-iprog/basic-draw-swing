@@ -1,11 +1,15 @@
 package se.kth.csc.iprog.draw.swing.canvas;
 
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.AbstractButton;
 import javax.swing.JFrame;
 
 import se.kth.csc.iprog.draw.model.ShapeContainer;
@@ -16,7 +20,7 @@ import se.kth.csc.iprog.draw.model.ShapeContainer;
  * 
  * @author cristi
  */
-public class CanvasController {
+public class CanvasController implements ActionListener {
     ShapeContainer model;
 
     CanvasView view;
@@ -28,7 +32,7 @@ public class CanvasController {
     /** keep track of all interaction controllers in a mapping */
     Map<String, CanvasInteractionController> modes;
 
-    String mode = "segment";
+    CanvasInteractionController currentMode;
 
     public CanvasController(final ShapeContainer model) {
         this.model = model;
@@ -42,12 +46,11 @@ public class CanvasController {
         modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view));
         modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view));
         modes.put("select", new SelectionController(model, view));
-
-        modes.get("select").activate();
+        currentMode = modes.get("segment");
 
         // controller displays the view
         JFrame f = new JFrame("canvas");
-        f.add(view);
+        f.add(new DrawingPanel(view, this, Arrays.asList("segment", "rectangle", "ellipse", "select")));
 
         f.pack();
 
@@ -60,5 +63,18 @@ public class CanvasController {
         });
         f.setLocation((int) (300 * Math.random()), (int) (500 * Math.random()));
         f.setVisible(true);
+
+        currentMode.activate();
+    }
+
+    /**
+     * a button has been pressed, change the mode
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        AbstractButton b = (AbstractButton) e.getSource();
+        currentMode.deactivate();
+        currentMode = modes.get(b.getName());
+        currentMode.activate();
     }
 }

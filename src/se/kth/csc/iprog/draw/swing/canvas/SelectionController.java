@@ -33,11 +33,11 @@ public class SelectionController extends CanvasInteractionController {
         super(model, view);
     }
 
-    // it is hard to e.g. click precisely on the rectangle so we allow a pixel deviation
-    static int PIXEL_DEV = 10;
+    // it is hard to click precisely on a line so we allow a pixel deviation
+    static int PIXEL_DEV = 5;
 
-    // the pixel segment may have a slightly different slope from the math segment
-    static double SLOPE_DEV = 0.3;
+    // deviation allowed from the ellipse equation
+    static double ELLIPSE_DEV = 0.1;
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -47,22 +47,17 @@ public class SelectionController extends CanvasInteractionController {
             // FIXME: this code is experimental, to prove the point. It will not be fixed for rigorous math
 
             if (s instanceof Segment) {
-
-                double height = s.getH();
-                // avoid division by zero
-                if (height == 0)
-                    height = 0.000001;
-                // avoid division by zero
-                double pixelHeight = dragStart.y - s.getY();
-                if (pixelHeight == 0)
-                    pixelHeight = 0.000001;
-
-                // check whether the slope in relation to the segment origin is the same as the segment slope, and
-                // whether we are within the segment bounds
-
-                if (inBoundsOf(dragStart, s)
-                        && Math.abs((dragStart.x - s.getX()) / pixelHeight - s.getW() / height) < SLOPE_DEV)
-                    selected = s;
+                if (inBoundsOf(dragStart, s)) {
+                    if (s.getW() == 0) {
+                        // we are in bounds
+                        selected = s;
+                    } else {
+                        double slope = s.getH() / s.getW();
+                        // line equation y= slope*x +y0
+                        if (Math.abs(slope * (dragStart.x - s.getX()) - dragStart.y + s.getY()) < PIXEL_DEV)
+                            selected = s;
+                    }
+                }
             } else if (s instanceof Rectangle) {
                 // check that we are within the rectangle bounds
                 if (inBoundsOf(dragStart, s)
@@ -74,8 +69,20 @@ public class SelectionController extends CanvasInteractionController {
                     selected = s;
 
             } else if (s instanceof Ellipse) {
+                // the two ellipse radia
+                double a = s.getW() / 2;
+                double b = s.getH() / 2;
+                // ellipse center
+                double cx = s.getX() + a;
+                double cy = s.getY() + b;
+                // the drag point in relation to the ellipse center
+                double x = dragStart.x - cx;
+                double y = dragStart.y - cy;
 
-                // TODO
+                // Ellipse equation sqr(x/a)+ sqr(y/b)=1
+                // we check so we don't deviate too much from it
+                if (Math.abs(x * x / a / a + y * y / b / b - 1) < ELLIPSE_DEV)
+                    selected = s;
 
             }
         }
