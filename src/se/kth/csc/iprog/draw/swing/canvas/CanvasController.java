@@ -1,9 +1,6 @@
 package se.kth.csc.iprog.draw.swing.canvas;
 
 import java.awt.Point;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
@@ -29,36 +26,7 @@ public class CanvasController {
     Point dragStop;
 
     /** keep track of all interaction controllers in a mapping */
-    Map<String, InteractionStrategy> modes;
-
-    /** the actual interaction controllers are coordinated by this one */
-    abstract static class InteractionStrategy implements MouseListener, MouseMotionListener, KeyListener {
-
-        ShapeContainer model;
-
-        CanvasView view;
-
-        InteractionStrategy(ShapeContainer model, CanvasView view) {
-            this.model = model;
-            this.view = view;
-        }
-
-        /** Activate this controller, register listeners */
-        void activate() {
-            view.setFocusable(true);
-            view.requestFocusInWindow();
-            view.addMouseListener(this);
-            view.addMouseMotionListener(this);
-            view.addKeyListener(this);
-        }
-
-        /** Another controller is being activated so we unregister listeners */
-        void deactivate() {
-            view.removeMouseListener(this);
-            view.removeMouseMotionListener(this);
-            view.removeKeyListener(this);
-        }
-    }
+    Map<String, CanvasInteractionController> modes;
 
     String mode = "segment";
 
@@ -69,7 +37,7 @@ public class CanvasController {
         this.view = new CanvasView(model);
 
         // prepare interaction controllers
-        modes = new HashMap<String, InteractionStrategy>();
+        modes = new HashMap<String, CanvasInteractionController>();
         modes.put("segment", new ShapeController(ShapeContainer.SEGMENT, model, view));
         modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view));
         modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view));

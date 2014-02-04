@@ -8,11 +8,9 @@ import se.kth.csc.iprog.draw.model.Shape;
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
 /**
- * Shape drawing interaction. Since InteractionStrategy implements many listeners but is abstract, the listener methods
- * must be defined here. MouseListener and MouseMotionListener are used to detect drag start, drag end and dragging. A
- * key listener is needed to detect drag cancellation.
+ * Shape drawing interaction.
  */
-public class ShapeController extends CanvasController.InteractionStrategy {
+public class ShapeController extends CanvasInteractionController {
 
     /**
      * type of shape drawn
@@ -48,23 +46,12 @@ public class ShapeController extends CanvasController.InteractionStrategy {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
-
-    @Override
     public void mouseDragged(MouseEvent e) {
         if (dragStart == null)
             // drag was cancelled
             return;
         // we use a class to normalize the coordinates
+        // ShapeCoordinates is defined locally in this file
         ShapeCoordinates sc = new ShapeCoordinates(type, dragStart, e.getPoint());
 
         // if dragging just began
@@ -79,46 +66,6 @@ public class ShapeController extends CanvasController.InteractionStrategy {
             model.modifyShape(current, sc.x, sc.y, sc.w, sc.h);
     }
 
-    /**
-     * Calculate valid shape coordinates and size given two end-points
-     * 
-     * @author cristi
-     */
-    static class ShapeCoordinates {
-        int x, y, w, h;
-
-        public ShapeCoordinates(int type, Point start, Point end) {
-            // copy the coordinates and size first
-            x = start.x;
-            y = start.y;
-            w = end.x - start.x;
-            h = end.y - start.y;
-
-            // for segments we allow negative height or width
-            if (type == ShapeContainer.SEGMENT)
-                return;
-
-            // for rectangles and ellipses normalize the coordinates so height and width are positive
-            if (w < 0) {
-                x = end.x;
-                w = -w;
-            }
-            if (h < 0) {
-                y = end.y;
-                h = -h;
-            }
-        }
-
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
     @Override
     public void keyPressed(KeyEvent e) {
         // if we are not in a d&d or we didn't create a shape yet, or the shape creation was cancelled, we ignore the
@@ -127,16 +74,43 @@ public class ShapeController extends CanvasController.InteractionStrategy {
             return;
 
         // escape pressed during d&d, we remove the currently created shape
-        if ("Escape".equals(KeyEvent.getKeyText(e.getKeyCode()))) {
+        if (isEscapeKey(e)) {
             model.removeShape(current);
             current = null;
             dragStart = null;
         }
 
     }
+}
 
-    @Override
-    public void keyReleased(KeyEvent e) {
+/**
+ * Calculate valid shape coordinates and size given two end-points
+ * 
+ * @author cristi
+ */
+class ShapeCoordinates {
+    int x, y, w, h;
+
+    public ShapeCoordinates(int type, Point start, Point end) {
+        // copy the coordinates and size first
+        x = start.x;
+        y = start.y;
+        w = end.x - start.x;
+        h = end.y - start.y;
+
+        // for segments we allow negative height or width
+        if (type == ShapeContainer.SEGMENT)
+            return;
+
+        // for rectangles and ellipses normalize the coordinates so height and width are positive
+        if (w < 0) {
+            x = end.x;
+            w = -w;
+        }
+        if (h < 0) {
+            y = end.y;
+            h = -h;
+        }
     }
 
 }
