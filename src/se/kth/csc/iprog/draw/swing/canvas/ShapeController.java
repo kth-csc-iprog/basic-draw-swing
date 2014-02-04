@@ -41,14 +41,6 @@ public class ShapeController extends CanvasInteractionController {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-        // dragging ended
-        current = null;
-        dragStart = null;
-        status.setText(" ");
-    }
-
-    @Override
     public void mouseDragged(MouseEvent e) {
         if (dragStart == null)
             // drag was cancelled
@@ -85,12 +77,19 @@ public class ShapeController extends CanvasInteractionController {
             dragStart = null;
             status.setText("");
         }
+    }
 
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // dragging ended
+        current = null;
+        dragStart = null;
+        status.setText(" ");
     }
 }
 
 /**
- * Calculate valid shape coordinates and size given two end-points
+ * Helper class to calculate valid shape coordinates and size given two end-points
  * 
  * @author cristi
  */

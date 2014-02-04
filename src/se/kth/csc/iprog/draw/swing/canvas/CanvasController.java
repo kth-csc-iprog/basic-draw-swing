@@ -28,12 +28,18 @@ public class CanvasController implements ActionListener {
     /** keep track of all interaction controllers in a mapping */
     Map<String, CanvasInteractionController> modes;
 
+    /** Currently active interaction controller */
     CanvasInteractionController currentMode;
 
-    // status bar, its text is not part of the basic model, but part of the interaction status, together with the
-    // current mode
+    /**
+     * status bar, its text is not part of the basic model, but part of the interaction status, together with the
+     * current mode
+     */
     JLabel status = new JLabel(" ");
 
+    /**
+     * Initialize, display view
+     */
     public CanvasController(final ShapeContainer model) {
         this.model = model;
 
@@ -48,10 +54,13 @@ public class CanvasController implements ActionListener {
         modes.put("select", new SelectionController(model, view, status));
         currentMode = modes.get("segment");
 
+        // prepare a panel that combines the canvas, the buttons and the status bar.
+        DrawingView panel = new DrawingView(view, status, this, Arrays.asList("segment", "rectangle", "ellipse",
+            "select"));
+
         // controller displays the view
         JFrame f = new JFrame("canvas");
-        f.add(new DrawingView(view, status, this, Arrays.asList("segment", "rectangle", "ellipse", "select")));
-
+        f.add(panel);
         f.pack();
 
         // close the view (so it will unregister from the model) when the window closes

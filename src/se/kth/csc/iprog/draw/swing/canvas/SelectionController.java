@@ -16,17 +16,17 @@ import se.kth.csc.iprog.draw.model.ShapeContainer;
  * Shape selection interaction, allows moving of already created shapes.
  */
 public class SelectionController extends CanvasInteractionController {
-    /*
+    /**
      * starting point for the dragging gesture
      */
     Point dragStart;
 
-    /*
+    /**
      * selected shape, if any
      */
     Shape selected;
 
-    /*
+    /**
      * original position of the selected shape
      */
     double originalX, originalY;
@@ -35,7 +35,7 @@ public class SelectionController extends CanvasInteractionController {
         super(model, view, status);
     }
 
-    // it is hard to click precisely on a line so we allow a pixel deviation
+    // it is hard to click precisely on a line so we allow a deviation of a few pixels
     static int PIXEL_DEV = 5;
 
     // deviation allowed from the ellipse equation
@@ -88,9 +88,11 @@ public class SelectionController extends CanvasInteractionController {
 
             }
         }
+        // no selection on this mouse press
         if (selected == null)
             dragStart = null;
         else {
+            // selection was made
             status.setText("selected " + selected);
             // save the original position of the shape
             originalX = selected.getX();
@@ -108,14 +110,6 @@ public class SelectionController extends CanvasInteractionController {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-        // end of dragging, shape was moved already by the mouseDragged event
-        selected = null;
-        dragStart = null;
-        status.setText(" ");
-    }
-
-    @Override
     public void mouseDragged(MouseEvent e) {
         // the drag didn't start on a shape, or was cancelled with Escape
         if (selected == null)
@@ -129,7 +123,7 @@ public class SelectionController extends CanvasInteractionController {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // if nothing is selected or dragging was cancelled, we ignore the keyboard
+        // if nothing is selected or dragging was already cancelled, we ignore the keyboard
         if (selected == null)
             return;
 
@@ -140,7 +134,14 @@ public class SelectionController extends CanvasInteractionController {
             dragStart = null;
             status.setText(" ");
         }
+    }
 
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        // end of dragging, shape was moved already by the mouseDragged event
+        selected = null;
+        dragStart = null;
+        status.setText(" ");
     }
 
 }

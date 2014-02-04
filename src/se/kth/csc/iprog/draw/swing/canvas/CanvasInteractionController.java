@@ -54,10 +54,16 @@ abstract class CanvasInteractionController implements MouseListener, MouseMotion
         return "Escape".equals(KeyEvent.getKeyText(e.getKeyCode()));
     }
 
+    // methods of the declared listeners that are not needed by subclasses
+    // we know that because we are interested in drag (mousePressed, mouseDragged), drop (mouseReleased), and drag
+    // cancellation (keyPressed)
+
+    // MouseListener
     @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    // MouseMotionListener
     @Override
     public void mouseEntered(MouseEvent e) {
     }
@@ -70,6 +76,7 @@ abstract class CanvasInteractionController implements MouseListener, MouseMotion
     public void mouseMoved(MouseEvent e) {
     }
 
+    // KeyListener
     @Override
     public void keyTyped(KeyEvent e) {
     }
