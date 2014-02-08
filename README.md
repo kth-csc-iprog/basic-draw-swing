@@ -5,3 +5,5 @@ This is the simple drawing application developed for the [Interaction Programing
 
 **Important!** This project depends on [another project](https://github.com/kth-csc-iprog/basic-draw-app-java-model) that implements the the model of the application.
 
+In Eclipse, make sure you import the basic-draw-app-java-model project first.
+
