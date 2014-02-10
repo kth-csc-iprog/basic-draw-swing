@@ -15,8 +15,8 @@ import se.kth.csc.iprog.draw.model.Shape;
 import se.kth.csc.iprog.draw.model.ShapeContainer;
 
 /**
- * Canvas view, draws all the shapes in a ShapeContainer model. It is a JPanel that overrides paintComponent to draw the
- * shapes. Simply repaints everything on notification from the model.
+ * Canvas view, draws all the shapes in a ShapeContainer model. It is a basic JComponent that overrides paintComponent
+ * to draw the shapes. Simply repaints everything on notification from the model.
  * 
  * @author cristi
  */

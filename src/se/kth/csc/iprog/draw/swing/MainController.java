@@ -28,6 +28,7 @@ public class MainController {
         // some test shapes
         model.addShape(ShapeContainer.SEGMENT, 10, 20, 30, 40);
         model.addShape(ShapeContainer.RECTANGLE, 40, 30, 30, 40);
+        model.addShape(ShapeContainer.ELLIPSE, 70, 70, 30, 40);
 
         // an action listener that distinguishes between buttons based on their name, and creates the respective type of
         // view (created by its controller)
