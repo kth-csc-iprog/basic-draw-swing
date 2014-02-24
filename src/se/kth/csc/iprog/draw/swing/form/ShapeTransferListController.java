@@ -87,10 +87,14 @@ final class ShapeTransferListController extends TransferHandler {
     public boolean canImport(TransferHandler.TransferSupport support) {
         System.out.println("canImport call");
 
-        // we simply check whether the data transferred is a file list
-        // we could actually obtain the file list, and check to see whether it contains shape files
+        // we simply check whether the data transferred can come as a file list (among other flavors)
+
+        // we could actually obtain the file list
         // like this: support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor)
-        return support.getDataFlavors()[0].equals(DataFlavor.javaFileListFlavor);
+        // and check to see whether it actually contains shape files
+        // but then again we have to take into account that this method is called very often
+
+        return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
     }
 
     /**
@@ -121,10 +125,8 @@ final class ShapeTransferListController extends TransferHandler {
             return true;
 
         } catch (UnsupportedFlavorException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return false;
