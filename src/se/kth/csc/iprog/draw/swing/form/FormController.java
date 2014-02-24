@@ -36,6 +36,9 @@ public class FormController implements ListSelectionListener, ActionListener {
         // attach the listeners to the list and text fields
         // note the access to the view fields (so-called Java "package" access)
         view.list.addListSelectionListener(this);
+
+        new ShapeTransferListController(view.list, model);
+
         view.xTextField.addActionListener(this);
         view.yTextField.addActionListener(this);
         view.heightTextField.addActionListener(this);
