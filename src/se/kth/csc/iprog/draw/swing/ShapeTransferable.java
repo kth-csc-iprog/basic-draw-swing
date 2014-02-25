@@ -8,9 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 import se.kth.csc.iprog.draw.model.Shape;
 import se.kth.csc.iprog.draw.model.ShapeContainer;
@@ -69,18 +68,10 @@ public class ShapeTransferable implements Transferable {
 
         // otherwise we make a file list
         File shapeFile = File.createTempFile("/tmp/" + shape.getType(), ".properties");
-        Properties p = new Properties();
-        p.put("type", shape.getType());
-        p.put("x", "" + shape.getX());
-        p.put("y", "" + shape.getY());
-        p.put("w", "" + shape.getW());
-        p.put("h", "" + shape.getH());
         FileOutputStream out = new FileOutputStream(shapeFile);
-        p.store(out, "");
+        shape.writeTo(out);
         out.close();
-        shapeFileList = new ArrayList<File>();
-        shapeFileList.add(shapeFile);
-        return shapeFileList;
+        return Arrays.asList(shapeFile);
     }
 
     /**
@@ -92,32 +83,16 @@ public class ShapeTransferable implements Transferable {
      */
     public static void addToModel(List<File> data, ShapeContainer model, int index) {
         for (File f : data) {
-            Properties p = new Properties();
             try {
                 FileInputStream in = new FileInputStream(f);
-                p.load(in);
+                model.addShape(Shape.readFrom(in), index++);
                 in.close();
             } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            int type = -1;
-            switch (p.getProperty("type")) {
-                case "rectangle":
-                    type = ShapeContainer.RECTANGLE;
-                    break;
-                case "ellipse":
-                    type = ShapeContainer.ELLIPSE;
-                    break;
-                case "segment":
-                    type = ShapeContainer.SEGMENT;
-                    break;
-            }
-            model.addShape(type, Double.parseDouble(p.getProperty("x")), Double.parseDouble(p.getProperty("y")),
-                Double.parseDouble(p.getProperty("w")), Double.parseDouble(p.getProperty("h")), index++);
+
         }
     }
 }
