@@ -3,9 +3,10 @@ package se.kth.csc.iprog.draw.swing;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class ShapeTransferable implements Transferable {
      * For now only files are supported. However, we could also support strings, in order to transfer within a swing
      * application without creating a file
      */
-    static DataFlavor[] supported = { DataFlavor.javaFileListFlavor };
+    static DataFlavor[] supported = { DataFlavor.javaFileListFlavor, DataFlavor.plainTextFlavor };
 
     @Override
     public DataFlavor[] getTransferDataFlavors() {
@@ -52,7 +53,7 @@ public class ShapeTransferable implements Transferable {
 
     @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
-        return flavor.equals(DataFlavor.javaFileListFlavor);
+        return Arrays.asList(supported).contains(flavor);
     }
 
     /**
@@ -63,36 +64,47 @@ public class ShapeTransferable implements Transferable {
         if (!isDataFlavorSupported(flavor))
             throw new UnsupportedFlavorException(flavor);
         // if we have already made the file list, we just return it
-        if (shapeFileList != null)
-            return shapeFileList;
+        if (flavor.equals(DataFlavor.plainTextFlavor)) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            shape.writeTo(bos);
+            bos.close();
+            return new ByteArrayInputStream(bos.toByteArray());
+        } else {
+            if (shapeFileList != null)
+                return shapeFileList;
 
-        // otherwise we make a file list
-        File shapeFile = File.createTempFile("/tmp/" + shape.getType(), ".properties");
-        FileOutputStream out = new FileOutputStream(shapeFile);
-        shape.writeTo(out);
-        out.close();
-        return Arrays.asList(shapeFile);
+            // otherwise we make a file list
+            File shapeFile = File.createTempFile("/tmp/" + shape.getType(), ".properties");
+            FileOutputStream out = new FileOutputStream(shapeFile);
+            shape.writeTo(out);
+            out.close();
+            return Arrays.asList(shapeFile);
+        }
     }
 
     /**
      * Read shapes from files and add them to a model. Utility method for entities that receive a list of shape files
      * 
-     * @param data
+     * @param transferable
      * @param model
      * @param index
      */
-    public static void addToModel(List<File> data, ShapeContainer model, int index) {
-        for (File f : data) {
-            try {
+    public static boolean addToModel(Transferable transferable, ShapeContainer model, int index) {
+        // get the transferred data
+        try {
+            @SuppressWarnings("unchecked")
+            List<File> transferData = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+
+            for (File f : transferData) {
                 FileInputStream in = new FileInputStream(f);
                 model.addShape(Shape.readFrom(in), index++);
                 in.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
+            }
+            return true;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return false;
         }
     }
 }

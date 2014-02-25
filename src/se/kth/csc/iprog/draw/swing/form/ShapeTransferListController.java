@@ -2,10 +2,6 @@ package se.kth.csc.iprog.draw.swing.form;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.JComponent;
@@ -94,7 +90,8 @@ final class ShapeTransferListController extends TransferHandler {
         // and check to see whether it actually contains shape files
         // but then again we have to take into account that this method is called very often
 
-        return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+        return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                || support.isDataFlavorSupported(DataFlavor.plainTextFlavor);
     }
 
     /**
@@ -107,29 +104,16 @@ final class ShapeTransferListController extends TransferHandler {
             return false;
 
         System.out.println("** importData call");
-        try {
-            // where will the new shape land? The default is "above the currently selected"
-            int addIndex = list.getSelectedIndex();
 
-            // drag and drop provides a precise location
-            if (support.isDrop())
-                addIndex = ((JList.DropLocation) support.getDropLocation()).getIndex();
+        // where will the new shape land? The default is "above the currently selected"
+        int addIndex = list.getSelectedIndex();
 
-            // get the transferred data
-            @SuppressWarnings("unchecked")
-            List<File> transferData = (List<File>) support.getTransferable().getTransferData(
-                DataFlavor.javaFileListFlavor);
+        // drag and drop provides a precise location
+        if (support.isDrop())
+            addIndex = ((JList.DropLocation) support.getDropLocation()).getIndex();
 
-            // add the transferred data to the model
-            ShapeTransferable.addToModel(transferData, model, addIndex);
-            return true;
-
-        } catch (UnsupportedFlavorException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+        // add the transferred data to the model
+        return ShapeTransferable.addToModel(support.getTransferable(), model, addIndex);
 
     }
 
