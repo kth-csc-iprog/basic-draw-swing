@@ -12,7 +12,7 @@ import se.kth.csc.iprog.draw.model.ShapeContainer;
 /**
  * Shape drawing interaction.
  */
-public class ShapeController extends CanvasInteractionController {
+public class ShapeDrawController extends CanvasInteractionController {
 
     /**
      * type of shape drawn
@@ -30,7 +30,7 @@ public class ShapeController extends CanvasInteractionController {
      */
     Shape current;
 
-    public ShapeController(int type, ShapeContainer model, CanvasView view, JLabel status) {
+    public ShapeDrawController(int type, ShapeContainer model, CanvasView view, JLabel status) {
         super(model, view, status);
         this.type = type;
     }

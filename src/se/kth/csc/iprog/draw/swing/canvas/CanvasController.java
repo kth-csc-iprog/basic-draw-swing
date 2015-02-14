@@ -48,9 +48,9 @@ public class CanvasController implements ActionListener {
 
         // prepare interaction controllers
         modes = new HashMap<String, CanvasInteractionController>();
-        modes.put("segment", new ShapeController(ShapeContainer.SEGMENT, model, view, status));
-        modes.put("rectangle", new ShapeController(ShapeContainer.RECTANGLE, model, view, status));
-        modes.put("ellipse", new ShapeController(ShapeContainer.ELLIPSE, model, view, status));
+        modes.put("segment", new ShapeDrawController(ShapeContainer.SEGMENT, model, view, status));
+        modes.put("rectangle", new ShapeDrawController(ShapeContainer.RECTANGLE, model, view, status));
+        modes.put("ellipse", new ShapeDrawController(ShapeContainer.ELLIPSE, model, view, status));
         modes.put("select", new SelectionController(model, view, status));
         currentMode = modes.get("segment");
 
