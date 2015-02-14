@@ -51,7 +51,7 @@ abstract class CanvasInteractionController implements MouseListener, MouseMotion
      * utility method to detect the escape key
      */
     protected boolean isEscapeKey(KeyEvent e) {
-        return "Escape".equals(KeyEvent.getKeyText(e.getKeyCode()));
+        return e.getKeyCode() == 27;
     }
 
     // methods of the declared listeners that are not needed by subclasses
