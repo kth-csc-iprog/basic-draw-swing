@@ -1,5 +1,6 @@
 package se.kth.csc.iprog.draw.swing.canvas;
 
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -42,7 +43,31 @@ public class SelectionController extends CanvasInteractionController {
     static double ELLIPSE_DEV = 0.1;
 
     @Override
+    public void mouseMoved(MouseEvent e) {
+        if (findShapeOnCursor(e) != null) {
+            view.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        } else {
+            view.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+
+    @Override
     public void mousePressed(MouseEvent e) {
+        selected = findShapeOnCursor(e);
+        // no selection on this mouse press
+        if (selected == null)
+            dragStart = null;
+        else {
+            // selection was made
+            status.setText("selected " + selected);
+            // save the original position of the shape
+            originalX = selected.getX();
+            originalY = selected.getY();
+        }
+    }
+
+    private Shape findShapeOnCursor(MouseEvent e) {
+
         dragStart = e.getPoint();
         for (Shape s : model.getAllShapes()) {
             // we do some math to calculate whether we are close to the shape
@@ -52,12 +77,12 @@ public class SelectionController extends CanvasInteractionController {
                 if (inBoundsOf(dragStart, s)) {
                     if (s.getW() == 0) {
                         // we are in bounds
-                        selected = s;
+                        return s;
                     } else {
                         double slope = s.getH() / s.getW();
                         // line equation y= slope*x +y0
                         if (Math.abs(slope * (dragStart.x - s.getX()) - dragStart.y + s.getY()) < PIXEL_DEV)
-                            selected = s;
+                            return s;
                     }
                 }
             } else if (s instanceof Rectangle) {
@@ -68,7 +93,7 @@ public class SelectionController extends CanvasInteractionController {
                                 || Math.abs(dragStart.x - s.getX() - s.getW()) < PIXEL_DEV
                                 || Math.abs(dragStart.y - s.getY()) < PIXEL_DEV || Math.abs(dragStart.y - s.getY()
                                 - s.getH()) < PIXEL_DEV))
-                    selected = s;
+                    return s;
 
             } else if (s instanceof Ellipse) {
                 // the two ellipse radia
@@ -84,20 +109,11 @@ public class SelectionController extends CanvasInteractionController {
                 // Ellipse equation sqr(x/a)+ sqr(y/b)=1
                 // we check so we don't deviate too much from it
                 if (Math.abs(x * x / a / a + y * y / b / b - 1) < ELLIPSE_DEV)
-                    selected = s;
+                    return s;
 
             }
         }
-        // no selection on this mouse press
-        if (selected == null)
-            dragStart = null;
-        else {
-            // selection was made
-            status.setText("selected " + selected);
-            // save the original position of the shape
-            originalX = selected.getX();
-            originalY = selected.getY();
-        }
+        return null;
     }
 
     /**
